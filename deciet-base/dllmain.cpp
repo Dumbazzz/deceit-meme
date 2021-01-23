@@ -158,20 +158,20 @@ namespace memory_utils
 
 namespace console
 {
-    FILE* out;
-    void attach(const char* title)
-    {
-        AllocConsole();
-        freopen_s(&out, "conout$", "w", stdout);
-        SetConsoleTitle(title);
-    }
+	FILE* out;
+	void attach(const char* title)
+	{
+		AllocConsole();
+		freopen_s(&out, "conout$", "w", stdout);
+		SetConsoleTitle(title);
+	}
 }
 
 void entry_thread(HMODULE module)
 {
-    console::attach("alternative: deceit base");
+	console::attach("alternative: deceit base");
 
-    std::cout << __FUNCTION__ << " > attach success\n";
+	std::cout << __FUNCTION__ << " > attach success\n";
 
 	HMODULE game_module = GetModuleHandle("Game.DLL");
 
@@ -183,10 +183,10 @@ void entry_thread(HMODULE module)
 
 	DWORD64 game_module_address = (DWORD64)game_module;
 
-    while (true)
-    {
-        if (GetAsyncKeyState(VK_DELETE))
-            break;
+	while (true)
+	{
+		if (GetAsyncKeyState(VK_DELETE))
+			break;
 
 		DWORD64 entity_list = memory_utils::read<DWORD64>( { game_module_address, 0xC2D4B0, 0x80 } );
 
@@ -235,28 +235,28 @@ void entry_thread(HMODULE module)
 
 		Sleep(100);
 		std::system("cls");
-    }
+	}
 
 	std::cout << __FUNCTION__ << " > free library...\n";
 
-    FreeLibraryAndExitThread(module, 0);
+	FreeLibraryAndExitThread(module, 0);
 }
 
 BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+					   DWORD  ul_reason_for_call,
+					   LPVOID lpReserved
+					 )
 {
-    switch (ul_reason_for_call)
-    {
-    case DLL_PROCESS_ATTACH:
-        CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)entry_thread, hModule, 0, 0);
-        break;
-    case DLL_THREAD_ATTACH:
-    case DLL_THREAD_DETACH:
-    case DLL_PROCESS_DETACH:
-        break;
-    }
-    return TRUE;
+	switch (ul_reason_for_call)
+	{
+	case DLL_PROCESS_ATTACH:
+		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)entry_thread, hModule, 0, 0);
+		break;
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
 }
 
