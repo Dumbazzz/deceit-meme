@@ -217,14 +217,14 @@ void entry_thread(HMODULE module)
 			if (player_entity == NULL)
 				continue;
 
-			DWORD64 player_entity_movement_controller = memory_utils::read<DWORD64>( { player_entity, 0x60 } );
+			DWORD64 player_entity_movement_controller = memory_utils::read<DWORD64>( { player_entity, 0x60, 0x78 } );
 
 			if (player_entity_movement_controller == NULL)
 				continue;
 
-			float coord_x = memory_utils::read<float>( { player_entity_movement_controller, 0x78, 0x1E8 } );
-			float coord_y = memory_utils::read<float>( { player_entity_movement_controller, 0x78, 0x1EC } );
-			float coord_z = memory_utils::read<float>( { player_entity_movement_controller, 0x78, 0x1F0 } );
+			float coord_x = memory_utils::read<float>( { player_entity_movement_controller, 0x1E8 } );
+			float coord_y = memory_utils::read<float>( { player_entity_movement_controller, 0x1EC } );
+			float coord_z = memory_utils::read<float>( { player_entity_movement_controller, 0x1F0 } );
 
 			std::cout 
 				<< "player id: " << i 
