@@ -546,12 +546,7 @@ namespace functions
 				if (name == NULL)
 					continue;
 
-				auto player_entity = entity->player_entity();
-
-				if (player_entity == NULL)
-					continue;
-
-				auto player_entity_movement_controller = entity->player_entity_movement_controller(player_entity);
+				auto player_entity_movement_controller = entity->player_entity_movement_controller(entity->player_entity());
 
 				if (player_entity_movement_controller == NULL)
 					continue;
