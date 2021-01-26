@@ -395,22 +395,12 @@ namespace game_utils
 		};
 	};
 
-	Matrix4x4 get_matrix()
-	{
-		return memory_utils::read<Matrix4x4>({ memory_utils::get_base_address(), 0x254E620 });
-	}
-
-	char* get_my_name()
-	{
-		return memory_utils::read_string({ memory_utils::get_base_address(), 0x24FA890 });
-	}
-
 	class Vector
 	{
 	public:
 		Vector() {};
 		Vector(float x, float y, float z) : x(x), y(y), z(z) {};
-		
+
 		Vector operator+(Vector other)
 		{
 			return Vector(x + other.x, y + other.y, z + other.z);
@@ -423,6 +413,26 @@ namespace game_utils
 
 		float x, y, z;
 	};
+
+	Matrix4x4 get_matrix()
+	{
+		return memory_utils::read<Matrix4x4>({ memory_utils::get_base_address(), 0x254E620 });
+	}
+
+	char* get_my_name()
+	{
+		return memory_utils::read_string({ memory_utils::get_base_address(), 0x24FA890 });
+	}
+
+	DWORD64 get_entity_list()
+	{
+		return memory_utils::read<DWORD64>({ (DWORD64)game_module, 0xC2D4B0, 0x80 });
+	}
+
+	int max_players_on_map()
+	{
+		return memory_utils::read<int>({ (DWORD64)game_module, 0xBBF534 });
+	}
 
 	class CEntity
 	{
@@ -515,16 +525,14 @@ namespace functions
 	{
 		void esp()
 		{
-			DWORD64 entity_list = memory_utils::read<DWORD64>({ (DWORD64)game_module, 0xC2D4B0, 0x80 });
+			auto entity_list = game_utils::get_entity_list();
 
 			if (entity_list == NULL)
 				return;
 
 			auto view_projection = game_utils::get_matrix();
 
-			int max_players_on_map = memory_utils::read<int>({ (DWORD64)game_module, 0xBBF534 });
-
-			for (int i = 1; i <= max_players_on_map; i++)
+			for (int i = 1; i <= game_utils::max_players_on_map(); i++)
 			{
 				auto entity = game_utils::CEntity::get_player_by_id(entity_list, i);
 				
