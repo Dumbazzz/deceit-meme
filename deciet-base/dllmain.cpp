@@ -592,7 +592,7 @@ void begin_scene()
 	if (vars::menu_open)
 	{
 		ImGui::GetIO().MouseDrawCursor = true;
-		ImGui::Begin("alternative.xyz: Deceit base hack | by zerrocxste", &vars::menu_open);
+		ImGui::Begin("alternativehack.xyz: Deceit base hack | by zerrocxste", &vars::menu_open);
 		ImGui::BeginChild("functions", ImVec2(), true);
 		ImGui::Text("Visuals");
 		ImGui::Checkbox("Enable", &vars::visuals::enable);
