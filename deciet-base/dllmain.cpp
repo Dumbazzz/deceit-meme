@@ -400,15 +400,90 @@ namespace game_utils
 		return memory_utils::read<Matrix4x4>({ memory_utils::get_base_address(), 0x254E620 });
 	}
 
-	bool WorldToScreen(Matrix4x4 view_projection, const float vIn[3], float* flOut)
+	char* get_my_name()
 	{
-		float w = view_projection.m[0][3] * vIn[0] + view_projection.m[1][3] * vIn[1] + view_projection.m[2][3] * vIn[2] + view_projection.m[3][3];
+		return memory_utils::read_string({ memory_utils::get_base_address(), 0x24FA890 });
+	}
+
+	class Vector
+	{
+	public:
+		Vector() {};
+		Vector(float x, float y, float z) : x(x), y(y), z(z) {};
+		
+		Vector operator+(Vector other)
+		{
+			return Vector(x + other.x, y + other.y, z + other.z);
+		}
+
+		Vector operator-(Vector other)
+		{
+			return Vector(x - other.x, y - other.y, z - other.z);
+		}
+
+		float x, y, z;
+	};
+
+	class CEntity
+	{
+	public:
+		static CEntity* get_player_by_id(DWORD64 entity_list, int id)
+		{
+			return memory_utils::read<CEntity*>({ entity_list, (DWORD64)(id * 0x8) });
+		}
+
+		char* get_name()
+		{
+			char* name = memory_utils::read_string({ (DWORD64)this, 0x480, 0x0 });;
+
+			if (strcmp(name, game_utils::get_my_name()) == 0)
+				return 0;
+			else
+				return name;
+		}
+
+		float get_health()
+		{
+			return memory_utils::read<float>({ (DWORD64)this, 0xEC });
+		}
+
+		DWORD64 player_entity()
+		{
+			return memory_utils::read<DWORD64>({ (DWORD64)this, 0x140 });
+		}
+
+		DWORD64 player_entity_movement_controller(DWORD64 player_entity)
+		{
+			return memory_utils::read<DWORD64>({ player_entity, 0x60, 0x78 });
+		}
+
+		Vector get_origin(DWORD64 player_entity_movement_controller)
+		{
+			return memory_utils::read<Vector>({ player_entity_movement_controller, 0x1E8 });
+		}
+
+		Vector get_aabb()
+		{
+			Vector aabb;
+
+			if (get_health() > 2.f)
+				aabb = Vector(0.f, 0.f, 1.8f);
+			else
+				aabb = Vector(0.f, 0.f, 0.4f);
+
+			return aabb;
+		}
+	};
+
+	bool world_to_screen(Matrix4x4 view_projection, const Vector vIn, float* flOut)
+	{
+		float w = view_projection.m[0][3] * vIn.x + view_projection.m[1][3] * vIn.y + view_projection.m[2][3] * vIn.z + view_projection.m[3][3];
 
 		if (w < 0.01)
 			return false;
 
-		flOut[0] = view_projection.m[0][0] * vIn[0] + view_projection.m[1][0] * vIn[1] + view_projection.m[2][0] * vIn[2] + view_projection.m[3][0];
-		flOut[1] = view_projection.m[0][1] * vIn[0] + view_projection.m[1][1] * vIn[1] + view_projection.m[2][1] * vIn[2] + view_projection.m[3][1];
+		flOut[0] = view_projection.m[0][0] * vIn.x + view_projection.m[1][0] * vIn.y + view_projection.m[2][0] * vIn.z + view_projection.m[3][0];
+		flOut[1] = view_projection.m[0][1] * vIn.x + view_projection.m[1][1] * vIn.y + view_projection.m[2][1] * vIn.z + view_projection.m[3][1];
 
 		float invw = 1.0f / w;
 
@@ -432,11 +507,6 @@ namespace game_utils
 
 		return true;
 	}
-
-	char* get_my_name()
-	{
-		return memory_utils::read_string({ memory_utils::get_base_address(), 0x24FA890 });
-	}
 }
 
 namespace functions
@@ -456,52 +526,43 @@ namespace functions
 
 			for (int i = 1; i <= max_players_on_map; i++)
 			{
-				DWORD64 entity = memory_utils::read<DWORD64>({ entity_list, (DWORD64)(i * 0x8) });
-
+				auto entity = game_utils::CEntity::get_player_by_id(entity_list, i);
+				
 				if (entity == NULL)
 					continue;
 
-				char* name = memory_utils::read_string({ entity, 0x480, 0x0 });
+				float health = entity->get_health();
 
-				if (name == NULL || strcmp(name, game_utils::get_my_name()) == 0)
+				char* name = entity->get_name();
+
+				if (name == NULL)
 					continue;
 
-				float health = memory_utils::read<float>({ entity, 0xEC });
-
-				DWORD64 player_entity = memory_utils::read<DWORD64>({ entity, 0x140 });
+				auto player_entity = entity->player_entity();
 
 				if (player_entity == NULL)
 					continue;
 
-				DWORD64 player_entity_movement_controller = memory_utils::read<DWORD64>({ player_entity, 0x60, 0x78 });
+				auto player_entity_movement_controller = entity->player_entity_movement_controller(player_entity);
 
 				if (player_entity_movement_controller == NULL)
 					continue;
 
-				float origin_bottom[3];
-				origin_bottom[0] = memory_utils::read<float>({ player_entity_movement_controller, 0x1E8 });
-				origin_bottom[1] = memory_utils::read<float>({ player_entity_movement_controller, 0x1EC });
-				origin_bottom[2] = memory_utils::read<float>({ player_entity_movement_controller, 0x1F0 });
-
-				float origin_top[3] = { origin_bottom[0], origin_bottom[1], origin_bottom[2] };
-
-				if (health > 2.f)
-					origin_top[2] += 1.8f;
-				else
-					origin_top[2] += 0.4f;
+				auto v_bottom = entity->get_origin(player_entity_movement_controller);
+				auto v_top = entity->get_origin(player_entity_movement_controller) + entity->get_aabb();
 
 				float out_bottom[2], out_top[2];
-				if (game_utils::WorldToScreen(view_projection, origin_bottom, out_bottom) 
-					&& game_utils::WorldToScreen(view_projection, origin_top, out_top))
+				if (game_utils::world_to_screen(view_projection, v_bottom, out_bottom)
+					&& game_utils::world_to_screen(view_projection, v_top, out_top))
 				{
 					float h = out_bottom[1] - out_top[1];
 					float w = h / 2;
 					float x = out_bottom[0] - w / 2;
 					float y = out_top[1];
 
-					drawing::DrawEspBox(x, y, w, h, ImColor(255, 255, 255));
+					drawing::DrawEspBox(x, y, w, h, ImColor(1.f, 1.f, 1.f));
 
-					drawing::DrawName(name, x, y, w, ImColor(1.f, 1.f, 1.f));
+					drawing::DrawName(entity->get_name(), x, y, w, ImColor(1.f, 1.f, 1.f));
 
 					drawing::DrawHealth(x, y, h, health, 100.f, ImColor(0.f, 1.f, 0.f));
 
