@@ -638,8 +638,11 @@ HRESULT WINAPI wndproc_hooked(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	if (Msg == WM_KEYDOWN && wParam == VK_INSERT)
 		vars::menu_open = !vars::menu_open;
 
-	if (vars::menu_open && ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam))
+	if (vars::menu_open)
+	{
+		ImGui_ImplWin32_WndProcHandler(hWnd, Msg, wParam, lParam);
 		return TRUE;
+	}
 
 	return CallWindowProc(pWndProc, hWnd, Msg, wParam, lParam);
 }
