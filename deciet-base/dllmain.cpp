@@ -740,7 +740,7 @@ void hook_dx11()
 
 	if (FAILED(D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, NULL, &feature_level, 1, D3D11_SDK_VERSION, &scd, &swapchain, &device, NULL, &context)))
 	{
-		std::cout << "failed to create device\n";
+		std::cout << __FUNCTION__ << " > failed to create device\n";
 		return;
 	}
 
