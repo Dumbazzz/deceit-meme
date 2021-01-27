@@ -439,7 +439,7 @@ namespace game_utils
 	public:
 		static CEntity* get_player_by_id(DWORD64 entity_list, int id)
 		{
-			return memory_utils::read<CEntity*>({ entity_list, (DWORD64)(id * 0x8) });
+			return memory_utils::read<CEntity*>({ entity_list, (DWORD64)((id + 1) * 0x8) });
 		}
 
 		char* get_name()
@@ -537,7 +537,7 @@ namespace functions
 
 			auto view_projection = game_utils::get_matrix();
 
-			for (int i = 1; i <= game_utils::max_players_on_map(); i++)
+			for (int i = 0; i < game_utils::max_players_on_map(); i++)
 			{
 				auto entity = game_utils::CEntity::get_player_by_id(entity_list, i);
 				
