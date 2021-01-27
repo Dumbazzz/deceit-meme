@@ -767,7 +767,7 @@ HRESULT WINAPI resizebuffers_hooked(IDXGISwapChain* pChain, UINT BufferCount, UI
 	return pResizeBuffers(pChain, BufferCount, Width, Height, NewFormat, Flags);
 }
 
-void hook_dx11()
+void hook_dx11(HMODULE module)
 {
 	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
 	DXGI_SWAP_CHAIN_DESC scd{};
@@ -823,29 +823,20 @@ void hook_dx11()
 
 	pPresentAddress = vtable_swapchain[IDXGISwapChainvTable::PRESENT];
 
-	if (MH_CreateHook(pPresentAddress, &present_hooked, (LPVOID*)&pPresent) != MH_OK)
+	if (MH_CreateHook(pPresentAddress, &present_hooked, (LPVOID*)&pPresent) != MH_OK ||
+		MH_EnableHook(pPresentAddress) != MH_OK)
 	{
 		std::cout << __FUNCTION__ << " > failed create hook present\n";
-		return;
-	}
-
-	if (MH_EnableHook(pPresentAddress) != MH_OK)
-	{
-		std::cout << __FUNCTION__ << " > failed enable hook present\n";
-		return;
+		FreeLibraryAndExitThread(module, 1);
 	}
 
 	pResizeBuffersAddress = vtable_swapchain[IDXGISwapChainvTable::RESIZE_BUFFERS];
 
-	if (MH_CreateHook(pResizeBuffersAddress, &resizebuffers_hooked, (LPVOID*)&pResizeBuffers) != MH_OK)
+	if (MH_CreateHook(pResizeBuffersAddress, &resizebuffers_hooked, (LPVOID*)&pResizeBuffers) != MH_OK || 
+		MH_EnableHook(pResizeBuffersAddress) != MH_OK)
 	{
 		std::cout << __FUNCTION__ << " > failed create hook resizebuffers\n";
-		return;
-	}
-
-	if (MH_EnableHook(pResizeBuffersAddress) != MH_OK)
-	{
-		std::cout << __FUNCTION__ << " > failed enable hook resizebuffers\n";
+		FreeLibraryAndExitThread(module, 1);
 	}
 }
 
@@ -891,19 +882,7 @@ void hack_thread(HMODULE module)
 
 	MH_Initialize();
 
-	hook_dx11();
-
-	if (pPresentAddress == NULL)
-	{
-		std::cout << __FUNCTION__ << " > failed hook dx11 present\n";
-		FreeLibraryAndExitThread(module, 1);
-	}
-
-	if (pResizeBuffers == NULL)
-	{
-		std::cout << __FUNCTION__ << " > failed hook dx11 resizebuffers\n";
-		FreeLibraryAndExitThread(module, 1);
-	}
+	hook_dx11(module);
 
 	hook_wndproc();
 
