@@ -847,9 +847,15 @@ void unhook(LPVOID address)
 	Sleep(100);
 }
 
-void hook_wndproc()
+void hook_wndproc(HMODULE module)
 {
 	pWndProc = (WNDPROC)SetWindowLongPtr(hwndGame, GWLP_WNDPROC, (LONG_PTR)wndproc_hooked);
+
+	if (pWndProc == NULL)
+	{
+		std::cout << __FUNCTION__ << " > failed hook wndproc\n";
+		FreeLibraryAndExitThread(module, 1);
+	}
 }
 
 void unhook_wndproc()
@@ -884,7 +890,7 @@ void hack_thread(HMODULE module)
 
 	hook_dx11(module);
 
-	hook_wndproc();
+	hook_wndproc(module);
 
 	while (true)
 	{
