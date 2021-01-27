@@ -486,7 +486,7 @@ namespace game_utils
 
 		Vector get_aabb_min()
 		{
-			return Vector(0.f, 0.f, 0.1f);
+			return Vector(0.f, 0.f, -0.1f);
 		}
 	};
 
@@ -556,7 +556,7 @@ namespace functions
 				if (player_entity_movement_controller == NULL)
 					continue;
 
-				auto v_bottom = entity->get_origin(player_entity_movement_controller) - entity->get_aabb_min();
+				auto v_bottom = entity->get_origin(player_entity_movement_controller) + entity->get_aabb_min();
 				auto v_top = entity->get_origin(player_entity_movement_controller) + entity->get_aabb_max();
 
 				float out_bottom[2], out_top[2];
@@ -661,7 +661,7 @@ void begin_scene()
 	if (vars::menu_open)
 	{
 		ImGui::GetIO().MouseDrawCursor = true;
-		ImGui::Begin("alternativehack.xyz: Deceit meme | by zerrocxste", &vars::menu_open);
+		ImGui::Begin("alternativehack.xyz: Deceit meme | credits: zerrocxste, guss.", &vars::menu_open);
 		ImGui::BeginChild("functions", ImVec2(), true);
 		ImGui::Text("Visuals");
 		ImGui::Checkbox("Enable", &vars::visuals::enable);
