@@ -472,7 +472,7 @@ namespace game_utils
 			return memory_utils::read<Vector>({ player_entity_movement_controller, 0x1E8 });
 		}
 
-		Vector get_aabb()
+		Vector get_aabb_max()
 		{
 			Vector aabb;
 
@@ -482,6 +482,11 @@ namespace game_utils
 				aabb = Vector(0.f, 0.f, 0.4f);
 
 			return aabb;
+		}
+
+		Vector get_aabb_min()
+		{
+			return Vector(0.f, 0.f, 0.1f);
 		}
 	};
 
@@ -551,8 +556,8 @@ namespace functions
 				if (player_entity_movement_controller == NULL)
 					continue;
 
-				auto v_bottom = entity->get_origin(player_entity_movement_controller);
-				auto v_top = entity->get_origin(player_entity_movement_controller) + entity->get_aabb();
+				auto v_bottom = entity->get_origin(player_entity_movement_controller) - entity->get_aabb_min();
+				auto v_top = entity->get_origin(player_entity_movement_controller) + entity->get_aabb_max();
 
 				float out_bottom[2], out_top[2];
 				if (game_utils::world_to_screen(view_projection, v_bottom, out_bottom)
