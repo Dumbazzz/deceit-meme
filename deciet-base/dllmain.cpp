@@ -565,7 +565,7 @@ namespace functions
 
 					drawing::DrawEspBox(x, y, w, h, ImColor(1.f, 1.f, 1.f));
 
-					drawing::DrawName(entity->get_name(), x, y, w, ImColor(1.f, 1.f, 1.f));
+					drawing::DrawName(name, x, y, w, ImColor(1.f, 1.f, 1.f));
 
 					drawing::DrawHealth(x, y, h, health, 100.f, ImColor(0.f, 1.f, 0.f));
 
