@@ -434,12 +434,12 @@ namespace game_utils
 		return memory_utils::read<int>({ (DWORD64)game_module, 0xBBF534 });
 	}
 
-	class CEntity
+	class CDeceitProperties
 	{
 	public:
-		static CEntity* get_player_by_id(DWORD64 entity_list, int id)
+		static CDeceitProperties* get_player_by_id(DWORD64 entity_list, int id)
 		{
-			return memory_utils::read<CEntity*>({ entity_list, (DWORD64)((id + 1) * 0x8) });
+			return memory_utils::read<CDeceitProperties*>({ entity_list, (DWORD64)((id + 1) * 0x8) });
 		}
 
 		char* get_name()
@@ -457,12 +457,12 @@ namespace game_utils
 			return memory_utils::read<float>({ (DWORD64)this, 0xEC });
 		}
 
-		DWORD64 player_entity()
+		DWORD64 player_entity() //CPlayer
 		{
 			return memory_utils::read<DWORD64>({ (DWORD64)this, 0x140 });
 		}
 
-		DWORD64 player_entity_movement_controller(DWORD64 player_entity)
+		DWORD64 player_entity_movement_controller(DWORD64 player_entity) //CPlayerMovementController
 		{
 			return memory_utils::read<DWORD64>({ player_entity, 0x60, 0x78 });
 		}
@@ -539,7 +539,7 @@ namespace functions
 
 			for (int i = 0; i < game_utils::max_players_on_map(); i++)
 			{
-				auto entity = game_utils::CEntity::get_player_by_id(entity_list, i);
+				auto entity = game_utils::CDeceitProperties::get_player_by_id(entity_list, i);
 				
 				if (entity == NULL)
 					continue;
