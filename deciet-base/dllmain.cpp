@@ -539,9 +539,9 @@ namespace functions
 				if (entity == NULL)
 					continue;
 
-				float health = entity->get_health();
+				auto health = entity->get_health();
 
-				char* name = entity->get_name();
+				auto name = entity->get_name();
 
 				if (name == NULL)
 					continue;
