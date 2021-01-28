@@ -457,6 +457,11 @@ namespace game_utils
 			return memory_utils::read<float>({ (DWORD64)this, 0xEC });
 		}
 
+		bool get_is_vampire_now()
+		{
+			return (bool)memory_utils::read<int>({ (DWORD64)this, 0x710 }); //0x714
+		}
+
 		DWORD64 player_entity() //CPlayer
 		{
 			return memory_utils::read<DWORD64>({ (DWORD64)this, 0x140 });
@@ -551,6 +556,8 @@ namespace functions
 				if (name == NULL)
 					continue;
 
+				auto color = entity->get_is_vampire_now() ? ImColor(1.f, 0.4f, 0.4f) : ImColor(1.f, 1.f, 1.f);
+
 				auto player_entity_movement_controller = entity->player_entity_movement_controller(entity->player_entity());
 
 				if (player_entity_movement_controller == NULL)
@@ -568,7 +575,7 @@ namespace functions
 					float x = out_bottom[0] - w / 2;
 					float y = out_top[1];
 
-					drawing::DrawEspBox(x, y, w, h, ImColor(1.f, 1.f, 1.f));
+					drawing::DrawEspBox(x, y, w, h, color);
 
 					drawing::DrawName(name, x, y, w, ImColor(1.f, 1.f, 1.f));
 
